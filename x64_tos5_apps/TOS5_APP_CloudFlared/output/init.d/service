@@ -1,0 +1,129 @@
+#!/bin/bash
+
+
+VERSION="2023.7.3"
+MOD_NAME=CloudFlared
+
+USER=$(id -un)
+RUNDIR=/usr/local/${MOD_NAME}/bin
+
+APP_ROOT=$(dirname $(dirname $(readlink -f $0)))
+BINDIR=$APP_ROOT/cloudflared/bin
+PIDFILE=$BINDIR/${MOD_NAME}.pid
+DAEMON=cloudflared-linux-amd64
+
+echo $BINDIR
+echo $PIDFILE
+
+#Function
+
+_findPID(){
+  
+  PID=`ps axf | grep "$DAEMON" | grep -v grep | awk '{print $1}'`
+}
+
+service_start(){
+    
+	_findPID
+
+	if [ $PID ];then
+		echo "${MOD_NAME} (pid $PID) is running"
+	else
+		rm -f $PIDFILE
+		echo "Starting $MOD_NAME: "
+    	start-stop-daemon --start -mp $PIDFILE --exec $BINDIR/$DAEMON  -- tunnel --no-autoupdate run --token eyJhIjoiNDEwMDU1NGE4NWNhN2U5OTVjYjY0YjZlMDQyMGZiOTciLCJ0IjoiYmQ0M2E1YzEtNDJhMy00NTA0LWE3M2ItOGU1NjBlZDgwNzk1IiwicyI6Ill6VXlaVFpsTmpjdFpHTXlaUzAwTXpOa0xUaGhZelV0WkdaaE1EWXpaV1ZrWWpKaCJ9
+	fi
+    
+	# init_config_folder
+	# get_vol_name >> $LOGFILE 2>&1
+	# get_main_volume >> $LOGFILE 2>&1
+	# init_cert >> $LOGFILE 2>&1
+	# #AddUser $USER >> $LOGFILE 2>&1
+	# AddDataFolder >> $LOGFILE 2>&1
+	# #create_data_dir >> $LOGFILE 2>&1
+	# service_prepare >> $LOGFILE 2>&1
+       
+}
+
+
+service_stop(){
+    echo -n "Stopping $MOD_NAME: "  
+	
+	_findPID
+
+	if [ -n "$PID" ];then
+		echo $PID
+	    start-stop-daemon --stop -p $PIDFILE -u $USER --oknodo --retry 30
+	else
+		echo "$MOD_NAME is not running"
+	fi	
+}
+
+
+case "$1" in
+
+start)
+	service_start
+	;;
+	
+stop)
+	service_stop
+	;;
+	
+reload)
+    echo -n "Restarting ${MOD_NAME}: "
+    stop
+	sleep 2
+	start
+    echo "ok."
+    ;;
+status)
+	_findPID
+	
+	if [[ -n "$PID" ]]; then
+			echo "${MOD_NAME} (pid $PID) is running."
+		else
+			echo "${MOD_NAME} is stopped."
+		fi
+	;;
+# status_autostart)
+# 	if [ -f /etc/app.d/${MOD_NAME} ]; then
+# 	echo "Autostart on boot is Enabled"
+# 	else
+# 	echo "Autostart on boot is Disabled"
+# 	fi
+#     ;;
+# enable_autostart)
+#     touch /etc/app.d/${MOD_NAME}
+# 	echo "...Enabled"
+# 	;;
+# disable_autostart)
+#     rm -f /etc/app.d/${MOD_NAME}
+# 	echo "...Disabled"
+#     ;;
+# reset)
+# 	stop
+#     rm -rf $MODCONFIGPATH
+# 	sleep 2
+# 	start
+# 	;;
+# inst_version)
+# 	echo "installed version is $VERSION"
+# 	;;
+# ZEROADD)
+# 	if [ ! -f /var/lib/zerotier-one/identity.secret ]; then
+# 	echo "Your ZeroTier address was not created"
+# 	else
+# 	echo "You are ZeroTier address [ `cat /var/lib/zerotier-one/identity.public | cut -d : -f 1` ]."
+# 	fi
+# 	;;
+# getport)
+#     service_getport
+#     ;;
+
+  *)
+    echo "Usage: `basename $0` {start|stop|remove_config|reload|status|status_autostart|enable_autostart|disable_autostart|reset}"
+    exit 1
+    ;;
+esac
+exit $?

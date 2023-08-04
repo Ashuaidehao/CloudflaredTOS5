@@ -1,25 +1,27 @@
 #!/bin/bash
 
+#Load system global environment variables
+source /etc/profile >/dev/null
+#Read the installation location of the current application
+InstallPath=$(dirname $(dirname $(readlink -f $0)))
+#Switch the current location to the installation directory of the app
+cd $InstallPath
 
 VERSION="2023.7.3"
 MOD_NAME=CloudFlared
-
 USER=$(id -un)
-RUNDIR=/usr/local/${MOD_NAME}/bin
 
-APP_ROOT=$(dirname $(dirname $(readlink -f $0)))
-BINDIR=$APP_ROOT/cloudflared/bin
+BINDIR=$InstallPath/sbin
 PIDFILE=$BINDIR/${MOD_NAME}.pid
 DAEMON=cloudflared-linux-amd64
 
 echo $BINDIR
-echo $PIDFILE
 
 #Function
 
 _findPID(){
-  
-  PID=`ps axf | grep "$DAEMON" | grep -v grep | awk '{print $1}'`
+  PID=$(pidof $DAEMON)
+#   PID=`ps axf | grep "$DAEMON" | grep -v grep | awk '{print $1}'`
 }
 
 service_start(){
@@ -31,7 +33,8 @@ service_start(){
 	else
 		rm -f $PIDFILE
 		echo "Starting $MOD_NAME: "
-    	start-stop-daemon --start -mp $PIDFILE --exec $BINDIR/$DAEMON  -- tunnel --no-autoupdate run --token eyJhIjoiNDEwMDU1NGE4NWNhN2U5OTVjYjY0YjZlMDQyMGZiOTciLCJ0IjoiYmQ0M2E1YzEtNDJhMy00NTA0LWE3M2ItOGU1NjBlZDgwNzk1IiwicyI6Ill6VXlaVFpsTmpjdFpHTXlaUzAwTXpOa0xUaGhZelV0WkdaaE1EWXpaV1ZrWWpKaCJ9
+		# $BINDIR/$DAEMON tunnel --no-autoupdate run --token eyJhIjoiNDEwMDU1NGE4NWNhN2U5OTVjYjY0YjZlMDQyMGZiOTciLCJ0IjoiYmQ0M2E1YzEtNDJhMy00NTA0LWE3M2ItOGU1NjBlZDgwNzk1IiwicyI6Ill6VXlaVFpsTmpjdFpHTXlaUzAwTXpOa0xUaGhZelV0WkdaaE1EWXpaV1ZrWWpKaCJ9
+    	start-stop-daemon --start -b -mp $PIDFILE --exec $BINDIR/$DAEMON  -- tunnel --no-autoupdate run --token eyJhIjoiNDEwMDU1NGE4NWNhN2U5OTVjYjY0YjZlMDQyMGZiOTciLCJ0IjoiYmQ0M2E1YzEtNDJhMy00NTA0LWE3M2ItOGU1NjBlZDgwNzk1IiwicyI6Ill6VXlaVFpsTmpjdFpHTXlaUzAwTXpOa0xUaGhZelV0WkdaaE1EWXpaV1ZrWWpKaCJ9
 	fi
     
 	# init_config_folder
@@ -53,6 +56,7 @@ service_stop(){
 
 	if [ -n "$PID" ];then
 		echo $PID
+		# kill $PID
 	    start-stop-daemon --stop -p $PIDFILE -u $USER --oknodo --retry 30
 	else
 		echo "$MOD_NAME is not running"

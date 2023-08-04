@@ -1,0 +1,6 @@
+[zh-cn]
+name = "CloudFlared"
+auth = "TerraMaster"
+descript = "这是适配 TOS5 的 CloudFlared!"
+
+

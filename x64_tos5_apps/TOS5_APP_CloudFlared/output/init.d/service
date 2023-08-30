@@ -90,21 +90,21 @@ status)
 			echo "${MOD_NAME} is stopped."
 		fi
 	;;
-# status_autostart)
-# 	if [ -f /etc/app.d/${MOD_NAME} ]; then
-# 	echo "Autostart on boot is Enabled"
-# 	else
-# 	echo "Autostart on boot is Disabled"
-# 	fi
-#     ;;
-# enable_autostart)
-#     touch /etc/app.d/${MOD_NAME}
-# 	echo "...Enabled"
-# 	;;
-# disable_autostart)
-#     rm -f /etc/app.d/${MOD_NAME}
-# 	echo "...Disabled"
-#     ;;
+status_autostart)
+	if [ -f /etc/app.d/${MOD_NAME} ]; then
+	echo "Autostart on boot is Enabled"
+	else
+	echo "Autostart on boot is Disabled"
+	fi
+    ;;
+enable_autostart)
+    touch /etc/app.d/${MOD_NAME}
+	echo "...Enabled"
+	;;
+disable_autostart)
+    rm -f /etc/app.d/${MOD_NAME}
+	echo "...Disabled"
+    ;;
 # reset)
 # 	stop
 #     rm -rf $MODCONFIGPATH
